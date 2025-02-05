@@ -17,26 +17,10 @@ func Any(v any) string {
 		return t
 	case fmt.Stringer:
 		return t.String()
-	case int:
-		return strconv.Itoa(t)
-	case int8:
-		return strconv.FormatInt(int64(t), 10)
-	case int16:
-		return strconv.FormatInt(int64(t), 10)
-	case int32:
-		return strconv.FormatInt(int64(t), 10)
-	case int64:
-		return strconv.FormatInt(t, 10)
-	case uint:
-		return strconv.FormatUint(uint64(t), 10)
-	case uint8:
-		return strconv.FormatUint(uint64(t), 10)
-	case uint16:
-		return strconv.FormatUint(uint64(t), 10)
-	case uint32:
-		return strconv.FormatUint(uint64(t), 10)
-	case uint64:
-		return strconv.FormatUint(t, 10)
+	case int, int8, int16, int32, int64:
+		return formatNum(t)
+	case uint, uint8, uint16, uint32, uint64:
+		return formatNum(t)
 	case float32:
 		return strconv.FormatFloat(float64(t), 'g', -1, 32)
 	case float64:
@@ -64,10 +48,44 @@ func Any(v any) string {
 //
 // For all other types, it delegates to the Any function for conversion.
 func AnyUnsafe(v any) string {
-	switch t := v.(type) {
-	case []byte:
-		return unsafe.String(unsafe.SliceData(t), len(t))
-	default:
-		return Any(v)
+	if b, ok := v.([]byte); ok {
+		return unsafe.String(unsafe.SliceData(b), len(b))
 	}
+
+	return Any(v)
+}
+
+func formatNum(v any) string {
+	switch t := v.(type) {
+	case int:
+		return itoa(t)
+	case int8:
+		return itoa(t)
+	case int16:
+		return itoa(t)
+	case int32:
+		return itoa(t)
+	case int64:
+		return itoa(t)
+	case uint:
+		return utoa(t)
+	case uint8:
+		return utoa(t)
+	case uint16:
+		return utoa(t)
+	case uint32:
+		return utoa(t)
+	case uint64:
+		return utoa(t)
+	default:
+		return ""
+	}
+}
+
+func itoa[T int | int8 | int16 | int32 | int64](v T) string {
+	return strconv.FormatInt(int64(v), 10)
+}
+
+func utoa[T uint | uint8 | uint16 | uint32 | uint64](v T) string {
+	return strconv.FormatUint(uint64(v), 10)
 }
